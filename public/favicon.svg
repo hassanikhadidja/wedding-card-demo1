@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Love">
+  <defs>
+    <linearGradient id="h" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#8B2E4A"/>
+      <stop offset="100%" stop-color="#5C1A2E"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#h)" d="M16 28.2c-.2 0-.4-.1-.6-.2C10.8 25.1 2 18.4 2 10.5 2 6.4 5.2 3 9.3 3c2.5 0 4.8 1.2 6.2 3.1 1.5-1.9 3.8-3.1 6.2-3.1C25.8 3 29 6.4 29 10.5c0 7.9-8.8 14.6-13.4 17.5-.2.1-.4.2-.6.2z"/>
+</svg>

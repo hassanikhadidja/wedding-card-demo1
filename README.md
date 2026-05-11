@@ -1,70 +1,57 @@
-# Getting Started with Create React App
+# Alex & Diane · 22 November 2026
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+*A little corner of the internet, saved for one day and the people who matter.*
 
-## Available Scripts
+This repository holds our **digital wedding invitation**: one scroll, many chapters—hero film, our story, the day’s rhythm, gifts, details, dress code, RSVP, travel tips, and a footer that still makes us smile.
 
-In the project directory, you can run:
+The experience itself lives in **`public/page1.html`** (fonts, motion, music toggle, bilingual copy, the works). The React shell in `src/` is a slim frame: it loads that page so we can host, build, and deploy with the usual toolchain—nothing more, nothing less.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Quick start
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm install
+npm start
+```
 
-### `npm test`
+Open **http://localhost:3000** — you’ll land straight on the invitation.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Command        | What it does                          |
+|----------------|----------------------------------------|
+| `npm start`    | Dev server + hot reload                |
+| `npm run build`| Production bundle in `build/`          |
+| `npm test`     | Jest smoke test for the shell          |
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Where to edit what
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| You want to…              | Look here |
+|---------------------------|------------|
+| Change copy, layout, RSVP | `public/page1.html` |
+| Swap hero / entry videos  | `public/assests/` (`video1.MP4`, `entry animation.MP4`, …) |
+| Static cover before entry | `assests/entry-animation-cover.jpg` (or `.png` / `.webp`), or `public/animation cover.jpg` |
+| Favicon & install icons   | `public/favicon.svg`, `public/icon-192.png`, `public/icon-512.png` |
+| App shell / iframe        | `src/App.js`, `src/App.css` |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+After editing `page1.html`, refresh the browser; no bundler step required for that file.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Deploy
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Build, then serve the `build/` folder on any static host (Netlify, Vercel, GitHub Pages, your own server). The build copies everything under `public/`, including `page1.html` and `assests/`.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Tech notes
 
-## Learn More
+- **React 19** + Create React App 5 — iframe loads `/page1.html` full-viewport.
+- **No backend** in this demo: RSVP alerts are client-side only; wire your own endpoint if you ship it for real guests.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Made with intention for a single Saturday in late autumn—and for everyone who will fill the room.
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**#AlexAndDiane2026**

@@ -252,34 +252,75 @@
         object-fit: contain;
       }
     }
-    .entry-tap-play {
+    .entry-overlay.has-poster .entry-video {
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .entry-overlay.is-playing .entry-video {
+      opacity: 1;
+    }
+    .entry-cover-img {
       position: absolute;
       inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
       z-index: 1;
+      pointer-events: none;
+      display: none;
+    }
+    .entry-overlay.has-poster .entry-cover-img {
+      display: block;
+    }
+    @media (min-width: 769px) {
+      .entry-cover-img {
+        object-fit: contain;
+        background: #0a0608;
+      }
+    }
+    .entry-play-hit {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
       border: none;
-      background: rgba(0, 0, 0, 0.38);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .entry-play-hit[hidden] {
+      display: none !important;
+    }
+    .entry-tap-hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: max(28px, calc(env(safe-area-inset-top, 0px) + 20px));
+      bottom: auto;
+      z-index: 3;
+      pointer-events: none;
+      margin: 0;
+      padding: 0 24px;
+      text-align: center;
       font-family: 'Montserrat', sans-serif;
       font-size: clamp(11px, 3.2vw, 14px);
       font-weight: 500;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.95);
-      cursor: pointer;
-      padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-      text-align: center;
-      touch-action: manipulation;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
     }
-    .entry-tap-play[hidden] {
+    .entry-tap-hint[hidden] {
       display: none !important;
     }
     .entry-skip {
       position: absolute;
       bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px));
       right: max(22px, calc(env(safe-area-inset-right, 0px) + 12px));
-      z-index: 2;
+      z-index: 4;
       font-family: 'Montserrat', sans-serif;
       font-size: 11px;
       font-weight: 500;
@@ -1680,13 +1721,15 @@
     playsinline
     webkit-playsinline
     preload="auto"
+    muted
   >
     <source src="assests/entry%20animation.MP4" type="video/mp4" />
     <source src="assests/entry%20animation.MOV" type="video/quicktime" />
   </video>
-  <button type="button" class="entry-tap-play" id="entryTapPlay">
-    <span data-i18n="entryTapPlay">Tap to play</span>
-  </button>
+  <!-- Optional static cover: add assests/entry-animation-cover.jpg or .png (same folder as the entry video). -->
+  <img id="entryCoverImage" class="entry-cover-img" alt="" width="1920" height="1080" decoding="async" />
+  <button type="button" class="entry-play-hit" id="entryPlayHit" data-i18n-aria="entryPlayAria"></button>
+  <p class="entry-tap-hint" id="entryTapHint"><span data-i18n="entryTapPlay">Tap the image to play</span></p>
   <button type="button" class="entry-skip" id="entrySkip" data-i18n="entrySkip">Skip</button>
 </div>
 
@@ -2229,8 +2272,9 @@
   const STRINGS = {
     en: {
       soundAria: 'Toggle background music',
+      entryPlayAria: 'Play welcome animation',
       entrySkip: 'Skip',
-      entryTapPlay: 'Tap to play',
+      entryTapPlay: 'Tap the image to play',
       heroEyebrow: "WE'RE GETTING MARRIED",
       heroDate: '22 NOVEMBER 2026',
       heroConfirm: 'CONFIRM ATTENDANCE',
@@ -2332,8 +2376,9 @@
     },
     fr: {
       soundAria: 'Activer ou couper la musique de fond',
+      entryPlayAria: 'Lancer l’animation d’accueil',
       entrySkip: 'Passer',
-      entryTapPlay: 'Appuyer pour lancer',
+      entryTapPlay: 'Appuyez sur l’image pour lancer',
       heroEyebrow: 'NOUS NOUS MARIONS',
       heroDate: '22 NOVEMBRE 2026',
       heroConfirm: 'CONFIRMER MA PRÉSENCE',
@@ -2549,18 +2594,71 @@
   function initEntryOverlay() {
     const overlay = document.getElementById('entryOverlay');
     const entryVideo = document.getElementById('entryVideo');
-    const tapBtn = document.getElementById('entryTapPlay');
+    const playHit = document.getElementById('entryPlayHit');
+    const tapHint = document.getElementById('entryTapHint');
     const skipBtn = document.getElementById('entrySkip');
-    if (!overlay || !entryVideo || !tapBtn || !skipBtn) return;
+    const coverImg = document.getElementById('entryCoverImage');
+    if (!overlay || !entryVideo || !playHit || !skipBtn) return;
 
+    entryVideo.muted = true;
     entryVideo.pause();
     entryVideo.currentTime = 0;
+
+    const posterCandidates = [
+      'animation%20cover.jpg',
+      'assests/entry-animation-cover.jpg',
+      'assests/entry-animation-cover.png',
+      'assests/entry-animation-cover.webp',
+    ];
+
+    function primeVideoStillFrame() {
+      const seekAndPause = () => {
+        try {
+          if (entryVideo.duration && !Number.isNaN(entryVideo.duration)) {
+            entryVideo.currentTime = Math.min(0.08, entryVideo.duration * 0.02);
+          } else {
+            entryVideo.currentTime = 0.08;
+          }
+        } catch (e) {
+          entryVideo.currentTime = 0;
+        }
+        entryVideo.pause();
+      };
+      if (entryVideo.readyState >= 2) {
+        seekAndPause();
+      } else {
+        entryVideo.addEventListener('loadeddata', seekAndPause, { once: true });
+      }
+    }
+
+    function tryLoadPoster(index) {
+      if (!coverImg) {
+        primeVideoStillFrame();
+        return;
+      }
+      if (index >= posterCandidates.length) {
+        primeVideoStillFrame();
+        return;
+      }
+      const probe = new Image();
+      probe.onload = () => {
+        coverImg.src = posterCandidates[index];
+        coverImg.style.display = 'block';
+        overlay.classList.add('has-poster');
+        primeVideoStillFrame();
+      };
+      probe.onerror = () => tryLoadPoster(index + 1);
+      probe.src = posterCandidates[index];
+    }
+
+    tryLoadPoster(0);
 
     let dismissed = false;
     function dismissEntry() {
       if (dismissed) return;
       dismissed = true;
       entryVideo.pause();
+      overlay.classList.remove('has-poster', 'is-playing');
       overlay.classList.add('entry-overlay--done');
       document.body.style.overflow = '';
       overlay.setAttribute('aria-hidden', 'true');
@@ -2569,25 +2667,45 @@
     entryVideo.addEventListener('ended', dismissEntry);
     skipBtn.addEventListener('click', dismissEntry);
 
-    tapBtn.addEventListener('click', () => {
+    function startEntryAnimation() {
       if (dismissed) return;
       if (entryVideo.error) {
         dismissEntry();
         return;
       }
+      overlay.classList.remove('has-poster');
+      overlay.classList.add('is-playing');
+      if (coverImg) {
+        coverImg.style.display = 'none';
+      }
       entryVideo.muted = false;
+      entryVideo.currentTime = 0;
       const playPromise = entryVideo.play();
-      if (pageMusic && !soundBtn.classList.contains('muted')) {
+      if (pageMusic && soundBtn && !soundBtn.classList.contains('muted')) {
         pageMusic.play().catch(() => {});
       }
       Promise.resolve(playPromise)
-        .then(() => { tapBtn.hidden = true; })
+        .then(() => {
+          playHit.hidden = true;
+          if (tapHint) tapHint.hidden = true;
+        })
         .catch(() => {
           entryVideo.muted = true;
           return entryVideo.play();
         })
-        .then(() => { tapBtn.hidden = true; })
+        .then(() => {
+          playHit.hidden = true;
+          if (tapHint) tapHint.hidden = true;
+        })
         .catch(() => {});
+    }
+
+    playHit.addEventListener('click', startEntryAnimation);
+    playHit.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        startEntryAnimation();
+      }
     });
 
     document.body.style.overflow = 'hidden';
