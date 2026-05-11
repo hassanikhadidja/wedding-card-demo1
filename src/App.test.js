@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('loads wedding invitation page in iframe', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const frame = screen.getByTitle(/Alex & Diane/i);
+  expect(frame).toBeInTheDocument();
+  expect(frame).toHaveAttribute('src', expect.stringContaining('page1.html'));
 });
