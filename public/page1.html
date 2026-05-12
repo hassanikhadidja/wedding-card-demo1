@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Alex & Diane — 22 November 2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Alice&family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Pinyon+Script&family=Jost:wght@300;400&family=Playfair+Display:wght@400;500&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="preload" href="assests/entry%20animation.MP4" as="video" type="video/mp4" fetchpriority="high" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1722,9 +1723,9 @@
     webkit-playsinline
     preload="auto"
     muted
+    fetchpriority="high"
   >
     <source src="assests/entry%20animation.MP4" type="video/mp4" />
-    <source src="assests/entry%20animation.MOV" type="video/quicktime" />
   </video>
   <!-- Optional static cover: add assests/entry-animation-cover.jpg or .png (same folder as the entry video). -->
   <img id="entryCoverImage" class="entry-cover-img" alt="" width="1920" height="1080" decoding="async" />
@@ -1743,6 +1744,7 @@
     loop
     playsinline
     muted
+    preload="none"
     src="assests/video1.MP4"
   ></video>
 
@@ -2356,7 +2358,7 @@
       ttdTitle2: 'Questions?',
       ttdP2: "Don't hesitate to reach out if you need any help planning your trip.",
       footerDate: 'November 22, 2026',
-      footerMade: 'Made with <span class="heart">&#9829;</span> for our special day',
+      footerMade: 'Made with <span class="heart">♡</span> for our special day',
       calTitle: 'Wedding Ceremony',
       calDesc: 'Join us as we exchange our vows in an intimate ceremony surrounded by our loved ones.',
       calLocation: 'Mairie du 19ème arrondissement, 5-7 Place Armand Carrel, 75019 Paris, France',
@@ -2460,7 +2462,7 @@
       ttdTitle2: 'Des questions ?',
       ttdP2: 'Écrivez-nous si vous avez besoin d’aide pour organiser votre voyage.',
       footerDate: '22 novembre 2026',
-      footerMade: 'Fait avec <span class="heart">&#9829;</span> pour notre grand jour',
+      footerMade: 'Fait avec <span class="heart">♡</span> pour notre grand jour',
       calTitle: 'Cérémonie de mariage',
       calDesc: 'Venez assister à notre échange de consentements, entourés de ceux que nous aimons.',
       calLocation: 'Mairie du 19ème arrondissement, 5-7 Place Armand Carrel, 75019 Paris, France',
@@ -2611,8 +2613,12 @@
       'assests/entry-animation-cover.webp',
     ];
 
+    let entryStillPrimed = false;
     function primeVideoStillFrame() {
+      if (entryStillPrimed) return;
       const seekAndPause = () => {
+        if (entryStillPrimed) return;
+        entryStillPrimed = true;
         try {
           if (entryVideo.duration && !Number.isNaN(entryVideo.duration)) {
             entryVideo.currentTime = Math.min(0.08, entryVideo.duration * 0.02);
@@ -2627,31 +2633,43 @@
       if (entryVideo.readyState >= 2) {
         seekAndPause();
       } else {
-        entryVideo.addEventListener('loadeddata', seekAndPause, { once: true });
+        const run = () => {
+          if (entryVideo.readyState >= 2) seekAndPause();
+        };
+        entryVideo.addEventListener('loadeddata', run, { once: true });
+        entryVideo.addEventListener('canplay', run, { once: true });
       }
     }
 
-    function tryLoadPoster(index) {
+    function pickPosterFastThenPrime() {
       if (!coverImg) {
         primeVideoStillFrame();
         return;
       }
-      if (index >= posterCandidates.length) {
-        primeVideoStillFrame();
-        return;
-      }
-      const probe = new Image();
-      probe.onload = () => {
-        coverImg.src = posterCandidates[index];
+      let posterChosen = false;
+      const choose = (url) => {
+        if (posterChosen) return;
+        posterChosen = true;
+        coverImg.src = url;
         coverImg.style.display = 'block';
         overlay.classList.add('has-poster');
         primeVideoStillFrame();
       };
-      probe.onerror = () => tryLoadPoster(index + 1);
-      probe.src = posterCandidates[index];
+      const failAll = () => {
+        if (posterChosen) return;
+        posterChosen = true;
+        primeVideoStillFrame();
+      };
+      posterCandidates.forEach((url) => {
+        const img = new Image();
+        img.onload = () => choose(url);
+        img.onerror = () => {};
+        img.src = url;
+      });
+      window.setTimeout(failAll, 450);
     }
 
-    tryLoadPoster(0);
+    pickPosterFastThenPrime();
 
     let dismissed = false;
     function dismissEntry() {
@@ -2662,6 +2680,14 @@
       overlay.classList.add('entry-overlay--done');
       document.body.style.overflow = '';
       overlay.setAttribute('aria-hidden', 'true');
+      const bg = document.getElementById('bgVideo');
+      if (bg) {
+        bg.preload = 'auto';
+        try {
+          bg.load();
+        } catch (e) { /* ignore */ }
+        bg.play().catch(() => {});
+      }
     }
 
     entryVideo.addEventListener('ended', dismissEntry);
@@ -2965,7 +2991,7 @@
 
   <p class="wedding-date" data-i18n="footerDate">November 22, 2026</p>
 
-  <p class="made-with" data-i18n-html="footerMade">Made with <span class="heart">&#9829;</span> for our special day</p>
+  <p class="made-with" data-i18n-html="footerMade">Made with <span class="heart">♡</span> for our special day</p>
 
   <div class="footer-divider"></div>
 
